@@ -1,0 +1,3 @@
+aws_region  = "<region>"
+bucket_name = "<bucket>"
+email       = "<email>"
