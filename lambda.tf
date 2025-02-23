@@ -36,6 +36,39 @@ resource "aws_iam_role_policy" "lambda_s3_policy" {
   })
 }
 
+resource "aws_iam_role_policy" "lambda_dynamodb_access" {
+  name = "LambdaDynamoDBAccess"
+  role = aws_iam_role.lambda.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:Query"
+        ],
+        Resource = aws_dynamodb_table.email_recipients.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "ses_send_email" {
+  name = "LambdaSESPolicy"
+  role = aws_iam_role.lambda.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = "ses:SendEmail",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 data "archive_file" "lambda" {
   type        = "zip"
   source_dir  = "${path.module}/lambda"
@@ -48,6 +81,13 @@ resource "aws_lambda_function" "lambda" {
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.12"
   role          = aws_iam_role.lambda.arn
+
+  environment {
+    variables = {
+      DDB_TABLE_NAME   = aws_dynamodb_table.email_recipients.name
+      SES_SENDER_EMAIL = var.email
+    }
+  }
 
   source_code_hash = fileexists("${path.module}/lambda.zip") ? filebase64sha256("${path.module}/lambda.zip") : ""
 

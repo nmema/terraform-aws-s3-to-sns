@@ -44,7 +44,6 @@ resource "aws_s3_bucket_policy" "require_tags" {
         Resource  = "${aws_s3_bucket.repo.arn}/*"
         Condition = {
           "StringNotEqualsIfExists" = {
-            "s3:RequestObjectTag/Environment" : "dev"
             "s3:RequestObjectTag/Owner" : ["HR", "Finance", "IT"]
           }
         }
