@@ -44,3 +44,6 @@ aws s3api put-object \
 ```bash
 terraform destroy
 ```
+
+### Architecture
+![diagram](./data/diagram.png)
